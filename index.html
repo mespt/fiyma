@@ -807,7 +807,7 @@
                         <div class="card-arrow">→</div>
                     </div>
                 </div>
-                <div class="document-card" onclick="window.open('https://drive.google.com/drive/folders/1_D1dykrxEhWqgYZjI1KqqKg6Bkc6qh_o?usp=sharing', '_blank')">
+                <div class="document-card" onclick="openDocumentList('gallery', 'Gallery')">
                     <span class="card-icon">📸</span>
                     <h3 class="card-title">📸 Gallery</h3>
                     <p class="card-description">Browse and share photos from the event.</p>
@@ -820,7 +820,7 @@
         </div>
     </div>
 
-    <!-- Document List Page -->
+    <!-- Document List Page (also used for Gallery day links) -->
     <div class="document-list-page" id="document-list-page">
         <div class="header">
             <div class="header-left">
@@ -996,6 +996,26 @@
 
 
                 ];
+
+                // Gallery days - each opens its Google Drive folder in a new tab.
+                // Replace the "path" URLs below with your actual Day 1 / Day 2 Drive folder links.
+                this.galleryDocuments = [
+                    {
+                        id: 'gallery-day1',
+                        name: 'Day 1 Photos',
+                        description: '30th June 2026 - Event photos from Day 1',
+                        path: 'https://drive.google.com/drive/folders/1_D1dykrxEhWqgYZjI1KqqKg6Bkc6qh_o?usp=sharing',
+                        icon: '📸'
+                    },
+                    {
+                        id: 'gallery-day2',
+                        name: 'Day 2 Photos',
+                        description: '1st July 2026 - Event photos from Day 2',
+                        path: 'https://drive.google.com/drive/folders/1Kgs904K-0Yt9oat4Gf5E3FrIvKFNr6Y8?usp=drive_link',
+                        icon: '📸'
+                    }
+                ];
+
                 this.initializePortal();
             }
             
@@ -1024,14 +1044,20 @@
                 document.getElementById('landing-page').style.display = 'none';
                 document.getElementById('pdf-viewer-page').classList.remove('active');
                 document.getElementById('document-list-page').classList.add('active');
-                
-                // Update list title
-                document.getElementById('list-title').textContent = `🖥️ ${title}`;
-                document.getElementById('list-subtitle').textContent = 'Select a document to view';
-                
+
+                // Update list title/subtitle based on category
+                if (category === 'gallery') {
+                    document.getElementById('list-title').textContent = `📸 ${title}`;
+                    document.getElementById('list-subtitle').textContent = 'Select a day to view photos (opens in a new tab)';
+                } else {
+                    document.getElementById('list-title').textContent = `🖥️ ${title}`;
+                    document.getElementById('list-subtitle').textContent = 'Select a document to view';
+                }
+
                 // Populate document list based on category
                 this.populateDocumentList(category);
                 this.currentPage = 'list';
+                this.currentCategory = category;
             }
             
             populateDocumentList(category) {
@@ -1039,14 +1065,25 @@
                 listContainer.innerHTML = '';
                 
                 let documents = [];
+                let isGallery = false;
+
                 if (category === 'docs') {
                     documents = this.valueChainDocuments;
+                } else if (category === 'gallery') {
+                    documents = this.galleryDocuments;
+                    isGallery = true;
                 }
                 
                 documents.forEach(doc => {
                     const documentItem = document.createElement('div');
                     documentItem.className = 'document-item';
-                    documentItem.onclick = () => this.openDocument(doc.id, doc.name, doc.path);
+
+                    if (isGallery) {
+                        // Gallery links open in a new browser tab instead of the PDF viewer
+                        documentItem.onclick = () => window.open(doc.path, '_blank');
+                    } else {
+                        documentItem.onclick = () => this.openDocument(doc.id, doc.name, doc.path);
+                    }
                     
                     documentItem.innerHTML = `
                         <div class="document-icon">${doc.icon}</div>
@@ -1054,7 +1091,7 @@
                             <div class="document-name">${doc.name}</div>
                             <div class="document-description">${doc.description}</div>
                         </div>
-                        <div class="document-arrow">→</div>
+                        <div class="document-arrow">${isGallery ? '↗' : '→'}</div>
                     `;
                     
                     listContainer.appendChild(documentItem);
@@ -1074,6 +1111,7 @@
                 }
                 
                 this.currentDocument = null;
+                this.currentCategory = null;
                 this.currentPage = 'landing';
             }
             
