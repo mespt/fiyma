@@ -992,13 +992,20 @@
                         description: 'Branding Guidelines and Communication Strategy',
                         path: 'docs/branding-guidelines-and-communication-strategy.pdf',
                         icon: '📄'
+                    },
+                    {
+                        id: 'rara-manual',
+                        name: 'FIYMA Intervention_Yearly Detailed Workplan Template',
+                        description: 'FIYMA Intervention_Yearly Detailed Workplan Template_ Final Copy',
+                        path: 'https://mespt-my.sharepoint.com/:x:/g/personal/ejuma_mespt_org/IQDrU5k9Znq1SapCGrpEX11jAed7A-Nne4VjG9ebNNwPa4Q?e=2H4RZ6',
+                        icon: '📄',
+                        external: true
                     }
 
 
                 ];
 
                 // Gallery days - each opens its Google Drive folder in a new tab.
-                // Replace the "path" URLs below with your actual Day 1 / Day 2 Drive folder links.
                 this.galleryDocuments = [
                     {
                         id: 'gallery-day1',
@@ -1078,8 +1085,12 @@
                     const documentItem = document.createElement('div');
                     documentItem.className = 'document-item';
 
-                    if (isGallery) {
-                        // Gallery links open in a new browser tab instead of the PDF viewer
+                    // Items that are gallery links, or individually flagged as
+                    // "external" (e.g. SharePoint/Drive files), open in a new tab
+                    // instead of the built-in PDF viewer.
+                    const opensExternally = isGallery || doc.external === true;
+
+                    if (opensExternally) {
                         documentItem.onclick = () => window.open(doc.path, '_blank');
                     } else {
                         documentItem.onclick = () => this.openDocument(doc.id, doc.name, doc.path);
@@ -1091,7 +1102,7 @@
                             <div class="document-name">${doc.name}</div>
                             <div class="document-description">${doc.description}</div>
                         </div>
-                        <div class="document-arrow">${isGallery ? '↗' : '→'}</div>
+                        <div class="document-arrow">${opensExternally ? '↗' : '→'}</div>
                     `;
                     
                     listContainer.appendChild(documentItem);
